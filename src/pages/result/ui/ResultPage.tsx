@@ -69,7 +69,10 @@ export function ResultPage() {
   const industry: IndustryId = project?.industry ?? storedIndustry ?? DEFAULT_INDUSTRY
   const projectName = project?.name ?? `프로젝트 ${(projectId ?? '').slice(0, 8) || 'mock'}`
 
-  const result = useMemo(() => buildMockResult(industry, projectName), [industry, projectName])
+  const result = useMemo(
+    () => buildMockResult(industry, projectName, projectId ?? 'mock'),
+    [industry, projectName, projectId],
+  )
 
   const [exportOpen, setExportOpen] = useState(false)
   const [copying, setCopying] = useState(false)
