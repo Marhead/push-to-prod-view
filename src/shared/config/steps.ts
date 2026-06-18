@@ -1,4 +1,4 @@
-export type StepId = 'input' | 'brd' | 'seed' | 'ontology' | 'db' | 'align' | 'final'
+export type StepId = 'input' | 'brd' | 'seed' | 'result'
 
 export interface StepMeta {
   id: StepId
@@ -9,13 +9,10 @@ export interface StepMeta {
 }
 
 export const STEPS: StepMeta[] = [
-  { id: 'input', index: 1, path: '/', label: 'S1 · Input', shortLabel: '입력' },
+  { id: 'input', index: 1, path: '/projects/new', label: 'S1 · 입력', shortLabel: '입력' },
   { id: 'brd', index: 2, path: '/brd', label: 'S2 · BRD Review', shortLabel: 'BRD' },
-  { id: 'seed', index: 3, path: '/seed', label: 'S3 · Question + Seed', shortLabel: '질문' },
-  { id: 'ontology', index: 4, path: '/graph/ontology', label: 'S4 · Ontology Graph', shortLabel: '온톨로지' },
-  { id: 'db', index: 5, path: '/db', label: 'S5 · DB Input', shortLabel: 'DB' },
-  { id: 'align', index: 6, path: '/align', label: 'S6 · Alignment', shortLabel: '얼라인' },
-  { id: 'final', index: 7, path: '/graph/final', label: 'S7 · Final + Export', shortLabel: '내보내기' },
+  { id: 'seed', index: 3, path: '/seed', label: 'S3 · 생성', shortLabel: '생성' },
+  { id: 'result', index: 4, path: '/result', label: 'S4 · 결과', shortLabel: '결과' },
 ]
 
 export const STEP_BY_ID: Record<StepId, StepMeta> = STEPS.reduce(

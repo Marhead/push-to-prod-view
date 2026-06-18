@@ -1,0 +1,5 @@
+export { OntologyGraph } from './ui/OntologyGraph'
+export { ontologyToFlow } from './lib/ontology-to-flow'
+export { applyDagreLayout } from './lib/apply-dagre-layout'
+export type { OntologyFlowNode, OntologyInput } from './lib/ontology-to-flow'
+export type { LayoutDirection } from './lib/apply-dagre-layout'

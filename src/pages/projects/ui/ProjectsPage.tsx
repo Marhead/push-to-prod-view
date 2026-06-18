@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FolderPlus, FileText, Layers, MoreVertical, Plus, Search, Trash2, LogOut } from 'lucide-react'
 import { toast } from 'sonner'
@@ -54,7 +54,12 @@ export function ProjectsPage() {
   const projects = useProjectListStore((s) => s.projects)
   const removeProject = useProjectListStore((s) => s.removeProject)
   const setActiveProjectId = useProjectListStore((s) => s.setActiveProjectId)
+  const ensureSeed = useProjectListStore((s) => s.ensureSeed)
   const resetActiveProject = useProjectStore((s) => s.reset)
+
+  useEffect(() => {
+    ensureSeed()
+  }, [ensureSeed])
 
   const username = useSessionStore((s) => s.username)
   const signOut = useSessionStore((s) => s.signOut)
@@ -74,8 +79,7 @@ export function ProjectsPage() {
 
   const openProject = (project: ProjectSummary) => {
     setActiveProjectId(project.id)
-    const target = STEP_BY_ID[project.step]?.path ?? '/projects/new'
-    navigate(target)
+    navigate(`/${project.id}`)
   }
 
   const newProject = () => {
