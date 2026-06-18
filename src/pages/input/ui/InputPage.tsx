@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
@@ -26,7 +26,7 @@ import { ProgressOverlay } from '@/widgets/progress-overlay'
 import { ErrorBanner } from '@/widgets/error-banner'
 
 import { INDUSTRIES, DEFAULT_INDUSTRY, type IndustryId } from '@/shared/config/industry'
-import { useProjectStore } from '@/entities/project'
+import { useProjectStore, useProjectListStore } from '@/entities/project'
 
 const DOC_KINDS = [
   { value: 'brd', label: 'BRD' },
@@ -43,6 +43,7 @@ const documentSchema = z.object({
 })
 
 const formSchema = z.object({
+  name: z.string().min(1, '프로젝트 이름을 입력하세요').max(80),
   industry: z.enum(['distribution']),
   documents: z.array(documentSchema).min(1, '문서를 1개 이상 추가하세요'),
 })
@@ -64,6 +65,14 @@ export function InputPage() {
   const persistedIndustry = useProjectStore((s) => s.industry)
   const persistedDocs = useProjectStore((s) => s.rawData)
 
+  const activeProjectId = useProjectListStore((s) => s.activeProjectId)
+  const projects = useProjectListStore((s) => s.projects)
+  const createProject = useProjectListStore((s) => s.createProject)
+  const updateProject = useProjectListStore((s) => s.updateProject)
+  const activeProject = activeProjectId
+    ? projects.find((p) => p.id === activeProjectId) ?? null
+    : null
+
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -78,6 +87,7 @@ export function InputPage() {
     resolver: zodResolver(formSchema),
     mode: 'onChange',
     defaultValues: {
+      name: activeProject?.name ?? '',
       industry: (persistedIndustry as IndustryId) ?? DEFAULT_INDUSTRY,
       documents:
         persistedDocs.length > 0
@@ -102,7 +112,24 @@ export function InputPage() {
           ...doc,
         })),
       )
-      toast.success('입력이 저장되었습니다', { description: '다음 단계로 이동합니다.' })
+
+      if (activeProject) {
+        updateProject(activeProject.id, {
+          name: values.name.trim(),
+          industry: values.industry,
+          documentCount: values.documents.length,
+          step: 'brd',
+        })
+      } else {
+        createProject({
+          name: values.name.trim(),
+          industry: values.industry,
+          documentCount: values.documents.length,
+          step: 'brd',
+        })
+      }
+
+      toast.success('프로젝트가 저장되었습니다', { description: '다음 단계로 이동합니다.' })
       await new Promise((r) => setTimeout(r, 250))
       navigate('/brd')
     } catch (err) {
@@ -120,8 +147,14 @@ export function InputPage() {
     <div className="min-h-screen bg-muted/40">
       <StepHeader
         activeStep="input"
-        title="S1 · 입력"
-        description="고객 산업과 입력 문서를 등록합니다. 입력은 sessionStorage에 자동 저장됩니다."
+        title={activeProject ? `S1 · ${activeProject.name}` : 'S1 · 새 프로젝트'}
+        description="프로젝트 이름과 산업, 입력 문서를 등록합니다. 입력은 sessionStorage에 자동 저장됩니다."
+        actions={
+          <Button variant="outline" size="sm" onClick={() => navigate('/')} className="gap-1">
+            <ArrowLeft className="h-4 w-4" />
+            프로젝트 목록
+          </Button>
+        }
       />
 
       <main className="container mx-auto flex flex-col gap-6 px-6 py-8">
@@ -132,13 +165,26 @@ export function InputPage() {
         <form onSubmit={onSubmit} className="flex flex-col gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>산업 선택</CardTitle>
+              <CardTitle>프로젝트 정보</CardTitle>
               <CardDescription>
                 MVP는 유통·공급망(TPC-H) 레퍼런스 스키마에 고정됩니다.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid max-w-md gap-2">
+            <CardContent className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="name">프로젝트 이름</Label>
+                <Input
+                  id="name"
+                  placeholder="예: ABC상사 PoC"
+                  aria-invalid={!!errors.name}
+                  {...register('name')}
+                />
+                {errors.name ? (
+                  <p className="text-xs text-destructive">{errors.name.message}</p>
+                ) : null}
+              </div>
+
+              <div className="grid gap-2">
                 <Label htmlFor="industry">산업</Label>
                 <Select
                   value={industry}
@@ -281,7 +327,7 @@ export function InputPage() {
               loadingText="저장 중..."
               disabled={!isValid}
             >
-              생성 시작
+              {activeProject ? '저장 후 다음 단계' : '프로젝트 생성'}
             </PrimaryButton>
           </div>
         </form>

@@ -5,7 +5,7 @@ import { useProjectStore } from '@/entities/project'
 export type StepRequirement = 'rawData' | 'brd' | 'questions' | 'ontology'
 
 const REDIRECTS: Record<StepRequirement, string> = {
-  rawData: '/',
+  rawData: '/projects/new',
   brd: '/brd',
   questions: '/seed',
   ontology: '/graph/ontology',

@@ -1,4 +1,6 @@
 export { useProjectStore } from './model/store'
+export { useProjectListStore } from './model/list-store'
+export type { ProjectSummary } from './model/list-store'
 export type {
   BusinessQuestion,
   DataStatus,
